@@ -6,36 +6,45 @@ const searchBtn=document.querySelector(".search")
 const images_Card=document.querySelector(".card img")
 const ul=document.querySelector("ul")
 let currentPage=1;
+const loadMore=document.querySelector(".load-more")
 
 async function getImages(dynamicImages){
+    
     const url=`https://api.unsplash.com/search/photos?page=${currentPage}&query=${dynamicImages}&client_id=${accessKey}`
     // console.log(url);
     const response=await fetch(url);
     const data=await response.json();
     console.log(data);
     const result=data.results;
+
     result.map((info)=>{
-        
         const li=document.createElement("li")
         li.classList.add("card")
         const img=document.createElement("img");
         img.src=info.urls.small;
-        img.alt=info.alt_description
         ul.appendChild(li)
         li.appendChild(img)
-        // images_Card.src=info.urls.small
-        // images_Card.alt=info.alt_description
+        const details=document.createElement("div")
+        details.classList.add("details")
+        li.appendChild(details)
+        
+        // const importBtn=document.createElement("button")
+        // details.appendChild(importBtn)
+        // importBtn.innerHTML=`<i class="uil uil-import"></i>`
+        // importBtn
+        details.innerHTML=`
+            <div class="photographer">
+                <span>${info.alt_description}</span>
+            </div>
+            <button onclick="downloadImg('${info.urls.small}')"><i class="uil uil-import"></i></button>
+        `
     })
+    currentPage++;
    
 }
-function randomImagess(){
-    const arrayImg=["water","India","fruits","animals"]
-    let randomNumber=Math.floor(Math.random()*arrayImg.length)
-    console.log(arrayImg[randomNumber]);
-    return arrayImg[randomNumber]
-}
-getImages("random")
-let inputData=""
+
+getImages("images")
+let inputData="images"
 form.addEventListener("submit",(event)=>{
         ul.replaceChildren("")
         inputData=searchImage.value;
@@ -43,8 +52,17 @@ form.addEventListener("submit",(event)=>{
         getImages(inputData);
 })
 
+loadMore.addEventListener('click', ()=>{
+    getImages(inputData);
+})
 
-
-
-// const formEL=document.querySelector("form")
-// const inputEl=document.querySelector("#search-img")
+const downloadImg=(imgURL)=>{
+    //Converting received images into blob, creating its download link, & downloading it!
+    fetch(imgURL).then(res=>res.blob()).then(file=>{
+        // console.log(file);
+        const anchoretag=document.createElement("a")
+        anchoretag.href=URL.createObjectURL(file)
+        anchoretag.download=new Date().getTime()
+        anchoretag.click()
+    }).catch(()=> alert("Failed to download image!"))
+}
